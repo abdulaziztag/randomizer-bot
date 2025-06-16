@@ -1,0 +1,40 @@
+{
+  "name": "randomizer",
+  "version": "1.0.0",
+  "description": "telegram bot for randomly choose winners",
+  "keywords": [
+    "telegram",
+    "bot",
+    "node",
+    "mongo"
+  ],
+  "license": "ISC",
+  "author": "Abdulaziz Manopov",
+  "type": "commonjs",
+  "main": "dist/index.js",
+  "scripts": {
+    "start": "NODE_ENV=production node dist/index.js",
+    "dev": "NODE_ENV=development ts-node src/index.ts",
+    "dev:watch": "NODE_ENV=development nodemon --watch 'src/**/*.ts' --exec 'ts-node' src/index.ts",
+    "build": "tsc",
+    "watch": "tsc -w",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "devDependencies": {
+    "@types/cors": "^2.8.18",
+    "@types/express": "^5.0.2",
+    "@types/node": "^22.15.19",
+    "nodemon": "^3.1.10",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.8.3"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dayjs": "^1.11.13",
+    "dotenv": "^16.5.0",
+    "express": "^5.1.0",
+    "mongoose": "^8.15.0",
+    "node-cron": "^4.0.7",
+    "telegraf": "^4.16.3"
+  }
+}
