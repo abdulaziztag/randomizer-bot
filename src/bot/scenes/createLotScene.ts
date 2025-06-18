@@ -74,18 +74,18 @@ export const createLotScene = new Scenes.WizardScene(
     let mediaType: 'photo' | 'video' | 'animation' | undefined = undefined;
 
     // @ts-ignore
-    if ('text' in msg && msg.text === 'go_back') {
-      await ctx.answerCbQuery();
-      // @ts-ignore
-      return ctx.wizard.select(1);
-    }
-
-    // @ts-ignore
-    if ('text' in msg && msg.text === 'go_back') {
-      await ctx.answerCbQuery();
-      await ctx.scene.leave();
-      return handleStartCommand(ctx);
-    }
+    // if ('text' in msg && msg.text === 'go_back') {
+    //   await ctx.answerCbQuery();
+    //   // @ts-ignore
+    //   return ctx.wizard.select(1);
+    // }
+    //
+    // // @ts-ignore
+    // if ('text' in msg && msg.text === 'go_back') {
+    //   await ctx.answerCbQuery();
+    //   await ctx.scene.leave();
+    //   return handleStartCommand(ctx);
+    // }
 
     // 1) If it's media, capture its file_id
     // @ts-ignore
