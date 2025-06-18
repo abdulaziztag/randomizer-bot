@@ -81,7 +81,7 @@ export const createLotScene = new Scenes.WizardScene(
     if (cb === 'go_back') {
       await ctx.answerCbQuery();
       // @ts-ignore
-      return ctx.wizard.select(1);
+      return ctx.wizard.back();
     }
 
     // @ts-ignore
