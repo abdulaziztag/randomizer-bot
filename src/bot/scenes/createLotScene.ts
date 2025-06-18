@@ -29,7 +29,7 @@ export const createLotScene = new Scenes.WizardScene(
 
   // STEP 1 — Lot name
   async (ctx) => {
-    await ctx.reply('📝 Введите название лота: PRod test');
+    await ctx.reply('📝 Введите название лота:');
     return ctx.wizard.next();
   },
 
@@ -233,7 +233,7 @@ export const createLotScene = new Scenes.WizardScene(
     // @ts-ignore
     const cb = ctx.callbackQuery?.data;
     if (cb === 'publish_time:now') {
-      state.publishTime = dayjs().utc().add(1, 'minute').toDate();
+      state.publishTime = dayjs().subtract(5, 'hour').add(1, 'minute').toDate();
       await ctx.answerCbQuery();
     } else {
       // @ts-ignore
@@ -243,7 +243,7 @@ export const createLotScene = new Scenes.WizardScene(
         await ctx.reply('❗ Формат неверен. DD.MM.YYYY HH:MM.');
         return;
       }
-      state.publishTime = dayjs(text, 'DD.MM.YYYY HH:mm').utc().toDate();
+      state.publishTime = dayjs(text, 'DD.MM.YYYY HH:mm').subtract(5, 'hour').toDate();
     }
     await ctx.reply(
       '⏹ Как завершить лот?',
@@ -284,7 +284,7 @@ export const createLotScene = new Scenes.WizardScene(
         await ctx.reply('❗ Неверный формат. DD.MM.YYYY HH:MM.');
         return;
       }
-      state.stopValueDate = dayjs(text, 'DD.MM.YYYY HH:mm').utc().toDate();
+      state.stopValueDate = dayjs(text, 'DD.MM.YYYY HH:mm').subtract(5, 'hour').toDate();
     } else {
       const num = Number(text);
       if (isNaN(num) || num < 1) {
