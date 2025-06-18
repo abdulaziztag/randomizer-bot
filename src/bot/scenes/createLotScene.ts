@@ -40,15 +40,16 @@ export const createLotScene = new Scenes.WizardScene(
   async (ctx) => {
     // @ts-ignore
     const text = ctx.message?.text?.trim();
-    if (!text) {
-      await ctx.reply('❗ Пожалуйста, введите название лота.');
-      return;
-    }
 
     if (text === 'cancel') {
       await ctx.answerCbQuery();
       await ctx.scene.leave();
       return handleStartCommand(ctx);
+    }
+
+    if (!text) {
+      await ctx.reply('❗ Пожалуйста, введите название лота.');
+      return;
     }
     (ctx.wizard.state as WizardState).name = text;
     await ctx.reply(
