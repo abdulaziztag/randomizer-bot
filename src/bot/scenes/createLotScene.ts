@@ -29,7 +29,7 @@ export const createLotScene = new Scenes.WizardScene(
 
   // STEP 1 — Lot name
   async (ctx) => {
-    await ctx.reply('📝 Введите название лота:');
+    await ctx.reply('📝 Введите название лота: PRod test');
     return ctx.wizard.next();
   },
 
