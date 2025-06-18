@@ -5,6 +5,7 @@ import customParseFormat from 'dayjs/plugin/customParseFormat';
 import utc from 'dayjs/plugin/utc';
 import {User, Lot} from '../../db/models';
 import {ILot} from '../../interfaces/ILot';
+import {handleStartCommand} from "../commands/start";
 
 
 interface WizardState extends Omit<ILot, 'publishTime' | 'stopValue'> {
@@ -29,7 +30,9 @@ export const createLotScene = new Scenes.WizardScene(
 
   // STEP 1 — Lot name
   async (ctx) => {
-    await ctx.reply('📝 Введите название лота:');
+    await ctx.reply('📝 Введите название лота:', Markup.inlineKeyboard([
+      Markup.button.callback('Отменить создание', 'cancel')
+    ], {columns: 2}));
     return ctx.wizard.next();
   },
 
@@ -41,15 +44,21 @@ export const createLotScene = new Scenes.WizardScene(
       await ctx.reply('❗ Пожалуйста, введите название лота.');
       return;
     }
-    if (EXIT_KEYWORDS.includes(text)) {
+
+    if (text === 'cancel') {
+      await ctx.answerCbQuery();
       await ctx.scene.leave();
-      return ctx.reply('Отмена создания лота.');
+      return handleStartCommand(ctx);
     }
     (ctx.wizard.state as WizardState).name = text;
     await ctx.reply(
       '🏁 Теперь отправьте *одно* медиа-сообщение (фото, видео или GIF). ' +
       'Если хотите, добавьте к нему подпись — она станет стартовым текстом лота. ' +
-      'Или просто отправьте текст без медиа, если не нужно медиа-превью.'
+      'Или просто отправьте текст без медиа, если не нужно медиа-превью.',
+      Markup.inlineKeyboard([
+        Markup.button.callback('Назад', 'go_back'),
+        Markup.button.callback('Отменить создание', 'cancel')
+      ], {columns: 2})
     );
     return ctx.wizard.next();
   },
@@ -61,6 +70,20 @@ export const createLotScene = new Scenes.WizardScene(
     let fileId: string | null = null;
     let text: string | undefined;
     let mediaType: 'photo' | 'video' | 'animation' | undefined = undefined;
+
+    // @ts-ignore
+    if ('text' in msg && msg.text === 'go_back') {
+      await ctx.answerCbQuery();
+      // @ts-ignore
+      return ctx.wizard.select(1);
+    }
+
+    // @ts-ignore
+    if ('text' in msg && msg.text === 'go_back') {
+      await ctx.answerCbQuery();
+      await ctx.scene.leave();
+      return handleStartCommand(ctx);
+    }
 
     // 1) If it's media, capture its file_id
     // @ts-ignore
@@ -84,7 +107,7 @@ export const createLotScene = new Scenes.WizardScene(
     // @ts-ignore
     text = ('caption' in msg && msg.caption)
       ? msg.caption.trim()
-    // @ts-ignore
+      // @ts-ignore
       : ('text' in msg && msg.text)
         ? msg.text.trim()
         : undefined;
@@ -98,7 +121,7 @@ export const createLotScene = new Scenes.WizardScene(
     }
     const state = ctx.wizard.state as WizardState;
     state.startMedia = fileId ?? undefined;
-    state.startText  = text  ?? '';
+    state.startText = text ?? '';
     state.mediaType = mediaType;
 
     await ctx.reply(
@@ -107,6 +130,8 @@ export const createLotScene = new Scenes.WizardScene(
         [Markup.button.callback('Participate', 'btnText:Participate')],
         [Markup.button.callback('Участвовать', 'btnText:Участвовать')],
         [Markup.button.callback('Ishtirok etish', 'btnText:Ishtirok etish')],
+        [Markup.button.callback('Назад', 'go_back')],
+        [Markup.button.callback('Отменить создание', 'cancel')]
       ])
     );
     return ctx.wizard.next();
