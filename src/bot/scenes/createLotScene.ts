@@ -60,7 +60,7 @@ export const createLotScene = new Scenes.WizardScene(
       'Если хотите, добавьте к нему подпись — она станет стартовым текстом лота. ' +
       'Или просто отправьте текст без медиа, если не нужно медиа-превью.',
       Markup.inlineKeyboard([
-        Markup.button.callback('Назад', 'go_back'),
+        // Markup.button.callback('Назад', 'go_back'),
         Markup.button.callback('Отменить создание', 'cancel')
       ], {columns: 2})
     );
@@ -77,14 +77,14 @@ export const createLotScene = new Scenes.WizardScene(
     // @ts-ignore
     const cb = ctx.callbackQuery?.data
 
-    // @ts-ignore
-    if (cb === 'go_back') {
-      await ctx.answerCbQuery();
-      // @ts-ignore
-      ctx.wizard.back();
-      // @ts-ignore
-      return ctx.wizard.step && ctx.wizard.step.handler(ctx);
-    }
+    // // @ts-ignore
+    // if (cb === 'go_back') {
+    //   await ctx.answerCbQuery();
+    //   // @ts-ignore
+    //   ctx.wizard.back();
+    //   // @ts-ignore
+    //   return ctx.wizard.step && ctx.wizard.step.handler(ctx);
+    // }
 
     // @ts-ignore
     if (cb === 'cancel') {
