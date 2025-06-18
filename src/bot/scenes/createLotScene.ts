@@ -2,8 +2,10 @@
 import {Scenes, Markup} from 'telegraf';
 import dayjs from 'dayjs';
 import customParseFormat from 'dayjs/plugin/customParseFormat';
-import {User, Lot, HoldingByTimeLot} from '../../db/models';
+import utc from 'dayjs/plugin/utc';
+import {User, Lot} from '../../db/models';
 import {ILot} from '../../interfaces/ILot';
+
 
 interface WizardState extends Omit<ILot, 'publishTime' | 'stopValue'> {
   selectedChannels?: string[];
@@ -19,6 +21,7 @@ const EXIT_KEYWORDS = [
   '🆕 New Lot', '📦 My Lots', '📡 My Channels'
 ];
 
+dayjs.extend(utc);
 dayjs.extend(customParseFormat);
 
 export const createLotScene = new Scenes.WizardScene(
@@ -230,7 +233,7 @@ export const createLotScene = new Scenes.WizardScene(
     // @ts-ignore
     const cb = ctx.callbackQuery?.data;
     if (cb === 'publish_time:now') {
-      state.publishTime = dayjs().add(1, 'minute').toDate();
+      state.publishTime = dayjs().utc().add(1, 'minute').toDate();
       await ctx.answerCbQuery();
     } else {
       // @ts-ignore
@@ -240,7 +243,7 @@ export const createLotScene = new Scenes.WizardScene(
         await ctx.reply('❗ Формат неверен. DD.MM.YYYY HH:MM.');
         return;
       }
-      state.publishTime = dayjs(text, 'DD.MM.YYYY HH:mm').toDate();
+      state.publishTime = dayjs(text, 'DD.MM.YYYY HH:mm').utc().toDate();
     }
     await ctx.reply(
       '⏹ Как завершить лот?',
@@ -281,7 +284,7 @@ export const createLotScene = new Scenes.WizardScene(
         await ctx.reply('❗ Неверный формат. DD.MM.YYYY HH:MM.');
         return;
       }
-      state.stopValueDate = dayjs(text, 'DD.MM.YYYY HH:mm').toDate();
+      state.stopValueDate = dayjs(text, 'DD.MM.YYYY HH:mm').utc().toDate();
     } else {
       const num = Number(text);
       if (isNaN(num) || num < 1) {
@@ -317,9 +320,9 @@ export const createLotScene = new Scenes.WizardScene(
     const pubCh = state.validChannels!.find(ch => ch.id === state.publishChannelId!);
     lines.push(`Публикация: ${pubCh?.title || 'Без требований'}`);
     lines.push(`Победители: ${state.winnersCount}`);
-    lines.push(`Публикация: ${dayjs(state.publishTime).format('DD.MM.YY HH:mm')}`);
+    lines.push(`Публикация: ${dayjs(state.publishTime).add(5, 'hour').format('DD.MM.YY HH:mm')}`);
     if (state.stopType === 'time') {
-      lines.push(`Завершение по времени: ${dayjs(state.stopValueDate).format('DD.MM.YY HH:mm')}`);
+      lines.push(`Завершение по времени: ${dayjs(state.stopValueDate).add(5, 'hour').format('DD.MM.YY HH:mm')}`);
     } else {
       lines.push(`Завершение по участникам: ${state.stopValueCount}`);
     }

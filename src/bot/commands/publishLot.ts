@@ -1,12 +1,13 @@
 import {Markup, Telegraf} from 'telegraf';
 import {HoldingByTimeLot, Lot} from '../../db/models';
+import dayjs from "dayjs";
 
 function escapeMdV2(str: string) {
   return str.replace(/([_*\[\]()~`>#+\-=|{}.!\\])/g, '\\$1');
 }
 
 export const publishLot = async (bot: Telegraf) => {
-  const now = new Date();
+  const now = dayjs().utc().toDate();
   const dueLots = await Lot.find({status: 'new', publishTime: {$lte: now}})
     .populate('channels')
     .populate('publishChannel');

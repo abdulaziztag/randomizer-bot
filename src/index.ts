@@ -7,6 +7,7 @@ import {publishLot} from "./bot/commands/publishLot";
 import {participationRoutes} from "./routes";
 import {HoldingByTimeLot} from "./db/models";
 import {publishResults} from "./bot/commands/publishResults";
+import dayjs from "dayjs";
 
 async function startApp() {
   const app = express();
@@ -26,7 +27,8 @@ async function startApp() {
   nodeCron.schedule('0 * * * * *', () => publishLot(bot));
 
   nodeCron.schedule('0 * * * * *', async () => {
-    const due = await HoldingByTimeLot.find({ time: { $lte: new Date() } });
+    const now = dayjs().utc().toDate()
+    const due = await HoldingByTimeLot.find({ time: { $lte: now } });
     await Promise.all(due.map(async h => {
       await publishResults(bot, h._id.toString());
       await h.deleteOne();
