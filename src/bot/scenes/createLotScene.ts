@@ -233,7 +233,7 @@ export const createLotScene = new Scenes.WizardScene(
     // @ts-ignore
     const cb = ctx.callbackQuery?.data;
     if (cb === 'publish_time:now') {
-      state.publishTime = dayjs().subtract(5, 'hour').add(1, 'minute').toDate();
+      state.publishTime = dayjs().utc().add(1, 'minute').toDate();
       await ctx.answerCbQuery();
     } else {
       // @ts-ignore
