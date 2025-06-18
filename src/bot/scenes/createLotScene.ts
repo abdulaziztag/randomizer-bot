@@ -31,8 +31,8 @@ export const createLotScene = new Scenes.WizardScene(
   // STEP 1 — Lot name
   async (ctx) => {
     await ctx.reply('📝 Введите название лота:', Markup.inlineKeyboard([
-      Markup.button.callback('Отменить создание', 'cancel')
-    ], {columns: 2}));
+      [Markup.button.callback('Отменить создание', 'cancel')]
+    ]));
     return ctx.wizard.next();
   },
 
