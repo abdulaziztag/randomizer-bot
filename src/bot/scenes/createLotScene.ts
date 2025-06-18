@@ -17,11 +17,6 @@ interface WizardState extends Omit<ILot, 'publishTime' | 'stopValue'> {
   stopValueCount?: number;
 }
 
-const EXIT_KEYWORDS = [
-  '/start', '/new_lot', '/my_lots', '/my_channels',
-  '🆕 New Lot', '📦 My Lots', '📡 My Channels'
-];
-
 dayjs.extend(utc);
 dayjs.extend(customParseFormat);
 
@@ -77,6 +72,13 @@ export const createLotScene = new Scenes.WizardScene(
     // @ts-ignore
     const cb = ctx.callbackQuery?.data
 
+    // @ts-ignore
+    if (cb === 'cancel') {
+      await ctx.answerCbQuery();
+      await ctx.scene.leave();
+      return handleStartCommand(ctx);
+    }
+
     // // @ts-ignore
     // if (cb === 'go_back') {
     //   await ctx.answerCbQuery();
@@ -85,13 +87,6 @@ export const createLotScene = new Scenes.WizardScene(
     //   // @ts-ignore
     //   return ctx.wizard.step && ctx.wizard.step.handler(ctx);
     // }
-
-    // @ts-ignore
-    if (cb === 'cancel') {
-      await ctx.answerCbQuery();
-      await ctx.scene.leave();
-      return handleStartCommand(ctx);
-    }
 
     // 1) If it's media, capture its file_id
     // @ts-ignore
@@ -123,10 +118,6 @@ export const createLotScene = new Scenes.WizardScene(
       await ctx.reply('❗ Пожалуйста, отправьте медиа-сообщение или текст.');
       return;
     }
-    if (EXIT_KEYWORDS.includes(text!)) {
-      await ctx.scene.leave();
-      return ctx.reply('Отмена создания лота.');
-    }
     const state = ctx.wizard.state as WizardState;
     state.startMedia = fileId ?? undefined;
     state.startText = text ?? '';
@@ -138,7 +129,7 @@ export const createLotScene = new Scenes.WizardScene(
         [Markup.button.callback('Participate', 'btnText:Participate')],
         [Markup.button.callback('Участвовать', 'btnText:Участвовать')],
         [Markup.button.callback('Ishtirok etish', 'btnText:Ishtirok etish')],
-        [Markup.button.callback('Назад', 'go_back')],
+        // [Markup.button.callback('Назад', 'go_back')],
         [Markup.button.callback('Отменить создание', 'cancel')]
       ])
     );
@@ -164,6 +155,12 @@ export const createLotScene = new Scenes.WizardScene(
       return;
     }
 
+    if (cb === 'cancel') {
+      await ctx.answerCbQuery();
+      await ctx.scene.leave();
+      return handleStartCommand(ctx);
+    }
+
     // Channels for participation
     state.selectedChannels = [];
     state.validChannels = [];
@@ -186,7 +183,7 @@ export const createLotScene = new Scenes.WizardScene(
       Markup.button.callback(`❌ ${ch.title}`, `toggle_channel:${ch.id}`)
     );
     buttons.push(Markup.button.callback('✅ Готово', 'channels_done'));
-    await ctx.reply('📡 Выберите каналы для участия:', Markup.inlineKeyboard(buttons, {columns: 2}));
+    await ctx.reply('📡 Выберите каналы для участия:', Markup.inlineKeyboard([...buttons, Markup.button.callback('Отменить создание', 'cancel')], {columns: 2}));
     return ctx.wizard.next();
   },
 
@@ -196,6 +193,12 @@ export const createLotScene = new Scenes.WizardScene(
     const data = ctx.callbackQuery?.data;
     if (!data) return;
     const state = ctx.wizard.state as WizardState;
+
+    if (data === 'cancel') {
+      await ctx.answerCbQuery();
+      await ctx.scene.leave();
+      return handleStartCommand(ctx);
+    }
 
     if (data.startsWith('toggle_channel:')) {
       const id = data.split(':')[1];
@@ -224,7 +227,7 @@ export const createLotScene = new Scenes.WizardScene(
       const publishButtons = state.validChannels!
         .filter(ch => channelIds.includes(ch.id))
         .map(ch => Markup.button.callback(ch.title, `publish_channel:${ch.id}`));
-      await ctx.reply('📢 В каком канале опубликовать лот?', Markup.inlineKeyboard(publishButtons, {columns: 1}));
+      await ctx.reply('📢 В каком канале опубликовать лот?', Markup.inlineKeyboard([...publishButtons, Markup.button.callback('Отменить создание', 'cancel')], {columns: 1}));
       return ctx.wizard.next();
     }
   },
@@ -233,12 +236,20 @@ export const createLotScene = new Scenes.WizardScene(
   async (ctx) => {
     // @ts-ignore
     const data = ctx.callbackQuery?.data;
+
+    if (data === 'cancel') {
+      await ctx.answerCbQuery();
+      await ctx.scene.leave();
+      return handleStartCommand(ctx);
+    }
+
     if (!data?.startsWith('publish_channel:')) return;
     await ctx.answerCbQuery();
     const [, id] = data.split(':');
     const state = ctx.wizard.state as WizardState;
     state.publishChannelId = id;
-    await ctx.reply('🏆 Сколько победителей будет? Введите число:');
+    await ctx.reply('🏆 Сколько победителей будет? Введите число:',
+      Markup.inlineKeyboard([Markup.button.callback('Отменить создание', 'cancel')], {columns: 2}));
     return ctx.wizard.next();
   },
 
@@ -247,6 +258,16 @@ export const createLotScene = new Scenes.WizardScene(
     // @ts-ignore
     const text = ctx.message?.text?.trim();
     const n = Number(text);
+
+    // @ts-ignore
+    const cb = ctx.callbackQuery?.data
+
+    if (cb === 'cancel') {
+      await ctx.answerCbQuery();
+      await ctx.scene.leave();
+      return handleStartCommand(ctx);
+    }
+
     if (!text || isNaN(n) || n < 1) {
       await ctx.reply('❗ Введите корректное число победителей.');
       return;
@@ -255,7 +276,7 @@ export const createLotScene = new Scenes.WizardScene(
     state.winnersCount = n;
     await ctx.reply(
       '🕑 Когда опубликовать лот? Нажмите «Сейчас» или введите дату DD.MM.YY HH:MM:',
-      Markup.inlineKeyboard([[Markup.button.callback('Сейчас', 'publish_time:now')]])
+      Markup.inlineKeyboard([[Markup.button.callback('Сейчас', 'publish_time:now')], [Markup.button.callback('Отменить создание', 'cancel')]])
     );
     return ctx.wizard.next();
   },
@@ -265,6 +286,13 @@ export const createLotScene = new Scenes.WizardScene(
     const state = ctx.wizard.state as WizardState;
     // @ts-ignore
     const cb = ctx.callbackQuery?.data;
+
+    if (cb === 'cancel') {
+      await ctx.answerCbQuery();
+      await ctx.scene.leave();
+      return handleStartCommand(ctx);
+    }
+
     if (cb === 'publish_time:now') {
       state.publishTime = dayjs().utc().add(1, 'minute').toDate();
       await ctx.answerCbQuery();
@@ -282,7 +310,8 @@ export const createLotScene = new Scenes.WizardScene(
       '⏹ Как завершить лот?',
       Markup.inlineKeyboard([
         [Markup.button.callback('По времени', 'stop_by:time')],
-        [Markup.button.callback('По участникам', 'stop_by:count')]
+        [Markup.button.callback('По участникам', 'stop_by:count')],
+        [Markup.button.callback('Отменить создание', 'cancel')]
       ])
     );
     return ctx.wizard.next();
@@ -292,15 +321,26 @@ export const createLotScene = new Scenes.WizardScene(
   async (ctx) => {
     // @ts-ignore
     const data = ctx.callbackQuery?.data;
+
+    if (data === 'cancel') {
+      await ctx.answerCbQuery();
+      await ctx.scene.leave();
+      return handleStartCommand(ctx);
+    }
+
     if (!data?.startsWith('stop_by:')) return;
     await ctx.answerCbQuery();
     const [, type] = data.split(':');
     const state = ctx.wizard.state as WizardState;
     state.stopType = type as any;
     if (type === 'time') {
-      await ctx.reply('⏰ Введите время окончания DD.MM.YYYY HH:MM:');
+      await ctx.reply('⏰ Введите время окончания DD.MM.YYYY HH:MM:', Markup.inlineKeyboard([
+        Markup.button.callback('Отменить создание', 'cancel')
+      ], {columns: 2}));
     } else {
-      await ctx.reply('🔢 Введите количество участников для завершения:');
+      await ctx.reply('🔢 Введите количество участников для завершения:', Markup.inlineKeyboard([
+        Markup.button.callback('Отменить создание', 'cancel')
+      ], {columns: 2}));
     }
     return ctx.wizard.next();
   },
@@ -308,6 +348,16 @@ export const createLotScene = new Scenes.WizardScene(
   // STEP 10 — Stop value & ask announcement
   async (ctx) => {
     const state = ctx.wizard.state as WizardState;
+
+    // @ts-ignore
+    const cb = ctx.callbackQuery?.data
+
+    if (cb === 'cancel') {
+      await ctx.answerCbQuery();
+      await ctx.scene.leave();
+      return handleStartCommand(ctx);
+    }
+
     // @ts-ignore
     const text = ctx.message?.text?.trim();
     if (!text) return;
@@ -327,7 +377,10 @@ export const createLotScene = new Scenes.WizardScene(
       state.stopValueCount = num;
     }
     await ctx.reply(
-      '🔔 Введите текст для объявления победителей, используйте ^winners^ для списка.'
+      '🔔 Введите текст для объявления победителей, используйте ^winners^ для списка.',
+      Markup.inlineKeyboard([
+        Markup.button.callback('Отменить создание', 'cancel')
+      ], {columns: 2})
     );
     return ctx.wizard.next();
   },
@@ -336,6 +389,16 @@ export const createLotScene = new Scenes.WizardScene(
   async (ctx) => {
     // @ts-ignore
     const text = ctx.message?.text;
+
+    // @ts-ignore
+    const cb = ctx.callbackQuery?.data;
+
+    if (cb === 'cancel') {
+      await ctx.answerCbQuery();
+      await ctx.scene.leave();
+      return handleStartCommand(ctx);
+    }
+
     if (!text || !text.includes('^winners^')) {
       await ctx.reply('❗ Текст должен содержать ^winners^.');
       return;
@@ -378,7 +441,8 @@ export const createLotScene = new Scenes.WizardScene(
     await ctx.answerCbQuery();
     if (data.endsWith(':cancel')) {
       await ctx.reply('❌ Создание лота отменено.');
-      return ctx.scene.leave();
+      await ctx.scene.leave();
+      return handleStartCommand(ctx);
     }
 
     // OK → save
