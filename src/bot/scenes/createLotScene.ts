@@ -42,6 +42,7 @@ export const createLotScene = new Scenes.WizardScene(
     const text = ctx.message?.text?.trim();
 
     if (text === 'cancel') {
+      console.log('testststststs')
       await ctx.answerCbQuery();
       await ctx.scene.leave();
       return handleStartCommand(ctx);
