@@ -144,6 +144,12 @@ export const createLotScene = new Scenes.WizardScene(
     // @ts-ignore
     const text = !cb ? ctx.message?.text?.trim() : undefined;
 
+    if (cb === 'cancel') {
+      await ctx.answerCbQuery();
+      await ctx.scene.leave();
+      return handleStartCommand(ctx);
+    }
+
     if (cb?.startsWith('btnText:')) {
       state.participateBtnText = cb.split(':')[1];
       await ctx.answerCbQuery();
@@ -153,12 +159,6 @@ export const createLotScene = new Scenes.WizardScene(
       await ctx.reply(`Текст кнопки установлен: "${state.participateBtnText}"`);
     } else {
       return;
-    }
-
-    if (cb === 'cancel') {
-      await ctx.answerCbQuery();
-      await ctx.scene.leave();
-      return handleStartCommand(ctx);
     }
 
     // Channels for participation
