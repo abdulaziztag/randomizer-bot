@@ -40,8 +40,10 @@ export const createLotScene = new Scenes.WizardScene(
   async (ctx) => {
     // @ts-ignore
     const text = ctx.message?.text?.trim();
+    // @ts-ignore
+    const cb = ctx.callbackQuery?.data
 
-    if (text === 'cancel') {
+    if (cb === 'cancel') {
       console.log('testststststs')
       await ctx.answerCbQuery();
       await ctx.scene.leave();
