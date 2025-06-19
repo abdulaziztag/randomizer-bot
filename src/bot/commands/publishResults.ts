@@ -49,7 +49,7 @@ export async function publishResults(
   const fragments = announceTemplate.split(/\^winners\^/g)
 
   const bulletList = mentions.length
-    ? '\n\\- ' + mentions.join('\n\\- ')
+    ? '\\- ' + mentions.join('\n\\- ')
     : '';
 
   let assembled = '';
