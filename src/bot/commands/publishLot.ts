@@ -32,7 +32,7 @@ export const publishLot = async (bot: Telegraf) => {
     ]);
 
     const opts = {
-      parse_mode: 'MarkdownV2' as const,
+      // parse_mode: 'MarkdownV2' as const,
       disable_web_page_preview: true,
       ...keyboard
     };
@@ -42,19 +42,19 @@ export const publishLot = async (bot: Telegraf) => {
     if (lot.startMedia && lot.mediaType) {
       switch (lot.mediaType) {
         case 'photo':
-          sent = await bot.telegram.sendPhoto(pubCh, lot.startMedia, { caption, ...opts });
+          sent = await bot.telegram.sendPhoto(pubCh, lot.startMedia, { caption, caption_entities: lot.startTextEntities, ...opts });
           break;
         case 'video':
-          sent = await bot.telegram.sendVideo(pubCh, lot.startMedia, { caption, ...opts });
+          sent = await bot.telegram.sendVideo(pubCh, lot.startMedia, { caption, caption_entities: lot.startTextEntities, ...opts });
           break;
         case 'animation':
-          sent = await bot.telegram.sendAnimation(pubCh, lot.startMedia, { caption, ...opts });
+          sent = await bot.telegram.sendAnimation(pubCh, lot.startMedia, { caption, caption_entities: lot.startTextEntities,  ...opts });
           break;
         default:
-          sent = await bot.telegram.sendDocument(pubCh, lot.startMedia, { caption, ...opts });
+          sent = await bot.telegram.sendDocument(pubCh, lot.startMedia, { caption, caption_entities: lot.startTextEntities, ...opts });
       }
     } else {
-      sent = await bot.telegram.sendMessage(pubCh, caption, opts);
+      sent = await bot.telegram.sendMessage(pubCh, caption, {entities: lot.startTextEntities, ...opts});
     }
 
     lot.publishedMessageId = sent?.message_id;

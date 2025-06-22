@@ -3,6 +3,7 @@ import {Types} from "mongoose";
 export interface ILot {
   name: string;
   startText?: string;
+  startTextEntities?: any[];
   startMedia?: string;
   mediaType?: 'photo' | 'video' | 'animation';
   participateBtnText: string;

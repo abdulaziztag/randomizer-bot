@@ -120,6 +120,8 @@ export const createLotScene = new Scenes.WizardScene(
     }
     const state = ctx.wizard.state as WizardState;
     state.startMedia = fileId ?? undefined;
+    // @ts-ignore
+    state.startTextEntities = [...(msg?.entities) || [], ...(msg?.caption_entities || [])];
     state.startText = text ?? '';
     state.mediaType = mediaType;
 
@@ -450,6 +452,7 @@ export const createLotScene = new Scenes.WizardScene(
     const newLot = await Lot.create({
       name: state.name!,
       startText: state.startText!,
+      startTextEntities: state.startTextEntities!,
       startMedia: state.startMedia!,
       mediaType: state.mediaType!,
       participateBtnText: state.participateBtnText!,

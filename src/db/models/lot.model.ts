@@ -4,6 +4,7 @@ import {ILot} from "../../interfaces/ILot";
 const lotSchema = new Schema<ILot>({
   name: { type: String, required: true },
   startText: { type: String },
+  startTextEntities: { type: Array },
   startMedia: { type: String },
   mediaType: { type: String, enum: ['photo', 'video', 'animation'] },
   participateBtnText: { type: String, required: true },
