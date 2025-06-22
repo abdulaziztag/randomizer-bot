@@ -20,7 +20,7 @@ export const publishLot = async (bot: Telegraf) => {
     const pubCh: any = (lot.publishChannel as any).telegramId;
 
     const lines: string[] = [
-      escapeMdV2(lot?.startText ?? '')
+      lot?.startText ?? ''
     ];
 
     const caption = lines.join('\n');
