@@ -31,6 +31,21 @@ async function startApp() {
     return next()
   })
 
+  bot.catch((err, ctx) => {
+    const e = err as any
+    const msg = e?.description || e?.message || String(e)
+    const chatId = ctx.chat?.id
+    const username = ctx.from?.username
+
+    if (
+      msg.includes('bot was blocked by the user') ||
+      msg.includes('message thread not found') ||
+      msg.includes('message to delete not found')
+    ) return
+
+    console.error(`⚠️ Bot error in chat ${chatId} (${username}):`, msg)
+  })
+
   nodeCron.schedule('0 * * * * *', async () => {
     const now = dayjs().utc().toDate()
     const due = await HoldingByTimeLot.find({ time: { $lte: now } });
