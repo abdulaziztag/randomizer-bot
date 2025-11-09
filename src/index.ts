@@ -26,6 +26,11 @@ async function startApp() {
   console.log('Bot is running...');
   nodeCron.schedule('0 * * * * *', () => publishLot(bot));
 
+  bot.use((ctx, next) => {
+    if (ctx.chat?.type !== 'private') return
+    return next()
+  })
+
   nodeCron.schedule('0 * * * * *', async () => {
     const now = dayjs().utc().toDate()
     const due = await HoldingByTimeLot.find({ time: { $lte: now } });
